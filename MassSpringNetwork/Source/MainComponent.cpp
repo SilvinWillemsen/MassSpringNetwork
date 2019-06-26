@@ -13,12 +13,15 @@ MainComponent::MainComponent()
 {
     // Make sure you set the size of the component after
     // you add any child components.
-    setSize (800, 600);
+    setSize (AppDefines::AppWidth, AppDefines::AppHeight);
 
     // specify the number of input and output channels that we want to open
     setAudioChannels (0, 2);
     addAndMakeVisible (network);
     Timer::startTimerHz (20);
+    addAndMakeVisible (drawModeButton);
+    drawModeButton.setButtonText ("Modebutton");
+    drawModeButton.addListener (this);
 }
 
 MainComponent::~MainComponent()
@@ -60,6 +63,7 @@ void MainComponent::getNextAudioBlock (const AudioSourceChannelInfo& bufferToFil
         Loutput[i] = clamp (network.getLOutput(), -1, 1);
         Routput[i] = clamp (network.getROutput(), -1, 1);
     }
+//    std::cout << network.getMasses()[5]->getPos()[0] << std::endl;
 }
 
 void MainComponent::releaseResources()
@@ -85,6 +89,7 @@ void MainComponent::resized()
     // If you add any child components, this is where you should
     // update their positions.
     network.setBounds (getLocalBounds());
+    drawModeButton.setBounds(0, 0, 200, 50);
 }
 
 void MainComponent::timerCallback()
@@ -100,4 +105,27 @@ double MainComponent::clamp (double input, double min, double max)
         return min;
     else
         return input;
+}
+
+void MainComponent::buttonClicked (Button* button)
+{
+    if (drawModeButton.getToggleStateValue() == true)
+    {
+        network.setDrawMode (drawLine);
+        std::cout << "Draw line" << std::endl;
+        for (int i = 0; i < network.getMasses().size(); ++i)
+        {
+            network.getMasses()[i]->setAlpha(0.0);
+        }
+    }
+    else
+    {
+        network.setDrawMode (drawMasses);
+        std::cout << "Draw masses" << std::endl;
+    }
+}
+
+void MainComponent::buttonStateChanged(Button* button)
+{
+
 }

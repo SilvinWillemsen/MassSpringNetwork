@@ -11,7 +11,7 @@
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "Network.h"
 //==============================================================================
-Network::Network()
+Network::Network() : numMasses(50), drawMode (drawMasses)
 {
     // In your constructor, you should add any child components, and
     // initialise any special settings that your component needs.
@@ -25,8 +25,8 @@ Network::~Network()
 void Network::init (double kToSet)
 {
     k = kToSet;
-    createString(50);
-    masses[5]->setPos (1, 1);
+    createString(numMasses);
+//    masses[5]->setPos (1, 1);
     for(auto mass : masses)
     {
         mass->setInvM (k);
@@ -41,15 +41,40 @@ void Network::paint (Graphics& g)
        You should replace everything in this method with your own
        drawing code..
     */
-    resized();
+    if (drawMode == drawLine) {
+    
+        Path stringPath;
+        auto stringBounds = getHeight() / 2.0;
+        stringPath.startNewSubPath(0, stringBounds);
+        
+        for (int i = 0; i < numMasses; i++)
+        {
+            int newY = masses[i]->getPos()[1] * 600;
+            stringPath.lineTo(masses[i]->getPos()[0] * 800, newY);
+        }
+        stringPath.lineTo (getWidth(), stringBounds);
+        g.setColour (Colours::lawngreen);
+        g.strokePath (stringPath, PathStrokeType(2.0f));
+    } else {
+        resized();
+    }
 }
 
 void Network::resized()
 {
-    
-    for (int i = 0; i < masses.size(); ++i)
+    if (AppDefines::numDim > 1)
     {
-        masses[i]->setBounds(masses[i]->getPos()[0] * 800, masses[i]->getPos()[1] * 600, 10, 10);
+        for (int i = 0; i < masses.size(); ++i)
+        {
+            masses[i]->setAlpha (masses[i]->getPos()[2]);
+            float size = 5 + 10 * masses[i]->getPos()[2];
+            masses[i]->setBounds (masses[i]->getPos()[0] * 800 - size / 2.0, masses[i]->getPos()[1] * 600 - size / 2.0, size, size);
+        }
+    } else {
+        for (int i = 0; i < masses.size(); ++i)
+        {
+            masses[i]->setBounds(i * AppDefines::AppWidth / masses.size(), masses[i]->getPos()[0] * 600, 10, 10);
+        }
     }
 }
 
@@ -84,7 +109,14 @@ void Network::createString (int numPoints)
     float spacing = 1 / static_cast<float>(numPoints);
     for (int i = 0; i < numPoints; ++i)
     {
-        addMass ({spacing * i, 0.5, 0.5}, 0.01);
+        std::vector<double> pos;
+        if (AppDefines::numDim > 1)
+        {
+            pos = {spacing * i, 0.5, 0.5};
+        } else {
+            pos = {0.5};
+        }
+        addMass (pos, 0.01);
         if (i == 0 || i == numPoints - 1)
         {
             masses[i]->setFixed();
@@ -104,17 +136,36 @@ void Network::connect (Mass* m1, Mass* m2)
 
 float Network::getLOutput()
 {
-    return masses[10]->getPos()[0] - 10 / masses.size();
+    return AppDefines::numDim > 1 ? masses[outputMass]->getPos()[0] - outputMass / static_cast<float>(masses.size()) : masses[outputMass]->getPos()[0] - 0.5;
+//    float xPosMass = masses[10]->getPos()[0] - 10 / masses.size();
+//    float yPosMass = masses[10]->getPos()[1] - 0.5;
+//    return sqrt (xPosMass * xPosMass + yPosMass *  yPosMass);
 }
 
 float Network::getROutput()
 {
-    return masses[10]->getPos()[1] - 0.5;
+    return masses[outputMass]->getPos()[AppDefines::numDim > 1 ? 1 : 0] - 0.5;
 }
 
 void Network::mouseDown (const MouseEvent& e)
 {
-    
-    masses[5]->setPos(1, masses[5]->getPos()[1] + 0.1);
+    float normXPos = e.x / static_cast<float> (AppDefines::AppWidth);
+    float normYPos = e.y / static_cast<float> (AppDefines::AppHeight) - 0.5;
+    int massNumber = normXPos * numMasses;
+    if (!masses[static_cast<int>(massNumber)]->isFixed())
+    {
+//        masses[static_cast<int>(massNumber)]->setPos(0, masses[massNumber]->getPos()[AppDefines::numDim > 1 ? 1 : 0] + 0.5);
+        if (AppDefines::numDim > 1)
+        {
+            std::cout << normYPos << std::endl;
+            masses[static_cast<int>(massNumber)]->setPos(1, normYPos);
+            masses[static_cast<int>(massNumber)]->setPos(2, normYPos);
+        }
+        else if (AppDefines::numDim == 1)
+        {
+            masses[static_cast<int>(massNumber)]->setPos(0, normYPos);
+        }
+//        std::cout << masses[static_cast<int>(massNumber)]->getPos()[0] << std::endl;
+    }
 }
 

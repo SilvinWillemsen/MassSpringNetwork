@@ -25,7 +25,14 @@ public:
     void resized() override;
 
     void setPos (std::vector<double> posToSet);
-    void setPos (int idx, double posToSet) { pos[idx] = posToSet; prevPos[idx] = posToSet; };
+    void setPos (int idx, double posToSet) {
+        pos[idx] = posToSet;
+        if (!init)
+        {
+            prevPos[idx] = posToSet;
+            init = true;
+        }
+    };
     
     std::vector<double>& getNextPos() { return nextPos; };
     std::vector<double>& getPos() { return pos; };
@@ -43,18 +50,19 @@ public:
     void setIdx (int val) { idx = val; };
     
     void setInvM (double k);
+    
+    void setZValue (double val) { zValue = val;}
 private:
     double mass;
-    std::vector<double> nextPos = {0, 0, 0};
-    std::vector<double> pos = {0, 0, 0};
-    std::vector<double> prevPos = {0, 0, 0};
+    std::vector<double> nextPos;
+    std::vector<double> pos;
+    std::vector<double> prevPos;
     
 
 //    std::vector<int> intPos = {0, 0, 0};
 //    std::vector<int> prevIntPos = {0, 0, 0};
     
     bool fixed = false;
-    int numDim = 3;
     
     double invM;
     
@@ -62,5 +70,7 @@ private:
     double sOk;
     
     double k;
+    double zValue = 0.5;
+    bool init = false;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Mass)
 };

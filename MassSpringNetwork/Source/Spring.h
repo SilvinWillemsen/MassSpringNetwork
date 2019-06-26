@@ -39,7 +39,7 @@ private:
     double Ftot = 0;
     std::vector<double> F = {0, 0, 0};
     int numDim = 3;
-    double l0 = 0.005;
+    double l0 = AppDefines::numDim > 1 ? 0.005 : 0;
     
     double k;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Spring)

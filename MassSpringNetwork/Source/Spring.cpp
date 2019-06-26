@@ -44,22 +44,33 @@ void Spring::calculateForces()
 {
     if (prevDist == 0)
     {
-        prevDist = sqrt((m1->getPrevPos()[0] - m2->getPrevPos()[0]) * (m1->getPrevPos()[0] - m2->getPrevPos()[0]) + (m1->getPrevPos()[1] - m2->getPrevPos()[1]) * (m1->getPrevPos()[1] - m2->getPrevPos()[1])
-                        + (m1->getPrevPos()[2] - m2->getPrevPos()[2]) * (m1->getPrevPos()[2] - m2->getPrevPos()[2]));
+        for (int i = 0; i < AppDefines::numDim; ++i)
+        {
+            prevDist = prevDist + (m1->getPrevPos()[i] - m2->getPrevPos()[i]) * (m1->getPrevPos()[i] - m2->getPrevPos()[i]);
+        }
+        prevDist = sqrt(prevDist);
     }
     else
     {
         prevDist = dist;
     }
-    dist = sqrt((m1->getPos()[0] - m2->getPos()[0]) * (m1->getPos()[0] - m2->getPos()[0])
-                + (m1->getPos()[1] - m2->getPos()[1]) * (m1->getPos()[1] - m2->getPos()[1])
-                + (m1->getPos()[2] - m2->getPos()[2]) * (m1->getPos()[2] - m2->getPos()[2]));
+    
+    dist = 0;
+    for (int i = 0; i < AppDefines::numDim; ++i)
+    {
+       
+        dist = dist + (m1->getPos()[i] - m2->getPos()[i]) * (m1->getPos()[i] - m2->getPos()[i]);
+    }
+    dist = sqrt(dist);
     
     Ftot = -K * (dist - l0) - K3 * (dist - l0) * (dist - l0) * (dist - l0) - Z * (dist - prevDist);
-    for (int i = 0; i < numDim; ++i)
+    for (int i = 0; i < AppDefines::numDim; ++i)
     {
         F[i] = Ftot * (m1->getPos()[i] - m2->getPos()[i]) / dist;
+        if (isnan(F[i]))
+            F[i] = 0;
     }
+    
     
     m1->addForces(F);
     m2->subtractForces(F);

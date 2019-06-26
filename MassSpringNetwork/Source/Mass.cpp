@@ -16,6 +16,9 @@ Mass::Mass (std::vector<double> pos, double mass, double k) : mass (mass), k(k)
 {
     // In your constructor, you should add any child components, and
     // initialise any special settings that your component needs.
+    nextPos.resize(AppDefines::numDim, 0);
+    pos.resize(AppDefines::numDim, 0);
+    prevPos.resize(AppDefines::numDim, 0);
     setPos (pos);
     double sigma = 0.01;
     sOk = sigma / k;
@@ -33,6 +36,8 @@ void Mass::paint (Graphics& g)
        You should replace everything in this method with your own
        drawing code..
     */
+    Colour c = Colours::yellow;
+    c.withAlpha (static_cast<float> (zValue));
     g.setColour (Colours::yellow);
     g.fillEllipse (0, 0, getWidth(), getHeight());
 //    setPos (pos);
@@ -58,7 +63,7 @@ void Mass::setPos (std::vector<double> posToSet)
 
 void Mass::calculateState()
 {
-    for (int i = 0; i < numDim; ++i)
+    for (int i = 0; i < AppDefines::numDim; ++i)
         nextPos[i] = 2 * pos[i] - prevPos[i] - sOk * invM * (pos[i] - prevPos[i]);
 }
 
@@ -67,7 +72,7 @@ void Mass::addForces (std::vector<double> F)
     if (fixed)
         return;
     
-    for (int i = 0; i < numDim; ++i)
+    for (int i = 0; i < AppDefines::numDim; ++i)
     {
         nextPos[i] += F[i] * invM;
     }
@@ -78,7 +83,7 @@ void Mass::subtractForces (std::vector<double> F)
     if (fixed)
         return;
     
-    for (int i = 0; i < numDim; ++i)
+    for (int i = 0; i < AppDefines::numDim; ++i)
     {
         nextPos[i] -= F[i] * invM;
     }

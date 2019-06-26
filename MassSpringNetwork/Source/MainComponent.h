@@ -17,7 +17,8 @@
     your controls and content.
 */
 class MainComponent   : public AudioAppComponent,
-                        public Timer
+                        public Timer,
+                        public Button::Listener
 {
 public:
     //==============================================================================
@@ -36,6 +37,9 @@ public:
     void timerCallback() override;
 
     double clamp (double input, double min, double max);
+    void buttonClicked (Button* button) override;
+    void buttonStateChanged (Button* button) override;
+    
 private:
     Network network;
     double fs;
@@ -43,7 +47,8 @@ private:
     long double t = 0;
     //==============================================================================
     // Your private member variables go here...
-
-
+    bool drawMode = drawMasses;
+    
+    ToggleButton drawModeButton;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainComponent)
 };

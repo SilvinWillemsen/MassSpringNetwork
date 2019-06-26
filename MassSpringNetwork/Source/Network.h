@@ -41,11 +41,18 @@ public:
     
     void mouseDown (const MouseEvent& e) override;
     
+    void setDrawMode (DrawMode mode) { drawMode = mode; };
 private:
     
     OwnedArray<Mass> masses;
     OwnedArray<Spring> springs;
     
     double k;
+    int numMasses;
+    
+    int outputMass = 10;
+    
+    DrawMode drawMode;
+    
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Network)
 };
